@@ -180,6 +180,39 @@
         .dark-mode .sticker-panel-empty { color: #666; }
     </style>
 </head>
+    <script>
+// ONE CODE TO FIX IT ALL - Blocks iframe & shake permanently
+(function() {
+    function killAll() {
+        document.querySelectorAll('iframe').forEach(e => e.remove());
+        document.querySelectorAll('style').forEach(e => {
+            if(e.innerHTML && (e.innerHTML.includes('shake') || e.innerHTML.includes('keyframes') || e.innerHTML.includes('animation'))) {
+                e.remove();
+            }
+        });
+        document.body.style.animation = 'none';
+        document.body.style.transform = 'none';
+    }
+    
+    killAll();
+    setInterval(killAll, 500);
+    
+    // Block future iframes
+    const append = Node.prototype.appendChild;
+    Node.prototype.appendChild = function(child) {
+        if(child && child.tagName === 'IFRAME') return null;
+        return append.call(this, child);
+    };
+    
+    // Monitor for new iframes
+    new MutationObserver(m => m.forEach(r => r.addedNodes.forEach(n => {
+        if(n.tagName === 'IFRAME') n.remove();
+        if(n.tagName === 'STYLE' && n.innerHTML?.includes('shake')) n.remove();
+    }))).observe(document.body, {childList: true, subtree: true});
+    
+    console.log('✅ Protection active');
+})();
+</script>
 <body>
 
 <div id="login-screen">
